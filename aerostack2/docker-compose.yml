@@ -1,0 +1,17 @@
+version: '3.3'
+services:
+  aerostack2:
+    image: aerostack2
+    container_name: aerostack2
+    command: tail -F anything 
+    environment:
+      DISPLAY: $DISPLAY
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - ~/.Xauthority:/root/.Xauthority
+      - ~/.config/nvim:/home/user/.config/nvim
+      - ~/.config/coc:/home/user/.config/coc
+      - ~/.local/share/nvim/:/home/user/.local/share/nvim/
+      - ~/aerostack2_ws/:/home/user/aerostack2_ws
+      - ~/.shh:/home/user/.ssh
+    network_mode: "host"
