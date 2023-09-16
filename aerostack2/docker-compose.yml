@@ -9,6 +9,8 @@ services:
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
       - ~/.Xauthority:/root/.Xauthority
+      - ~/.tmux:/home/user/.tmux
+      - ~/.tmux.conf:/home/user/.tmux.conf
       - ~/.config/nvim:/home/user/.config/nvim
       - ~/.config/coc:/home/user/.config/coc
       - ~/.local/share/nvim/:/home/user/.local/share/nvim/
