@@ -25,8 +25,8 @@ $docker exec -it aerostack2 /bin/bash
 
 For stopping the container
 ```
-docker compose down
+$ docker compose down
 # if this fail try 
-docker-compose down
+$ docker-compose down
 ```
 
