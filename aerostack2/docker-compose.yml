@@ -15,5 +15,5 @@ services:
       - ~/.config/coc:/home/user/.config/coc
       - ~/.local/share/nvim/:/home/user/.local/share/nvim/
       - ~/aerostack2_ws/:/home/user/aerostack2_ws
-      - ~/.shh:/home/user/.ssh
+      # - ~/.shh:/home/user/.ssh
     network_mode: "host"

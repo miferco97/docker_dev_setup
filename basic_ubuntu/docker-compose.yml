@@ -1,8 +1,8 @@
 version: '3.3'
 services:
   container:
-    image: basic_container
-    container_name: basic_container
+    image: ubuntu_basic
+    container_name: ubuntu_basic
     command: tail -F anything 
     environment:
       DISPLAY: $DISPLAY
@@ -14,5 +14,5 @@ services:
       - ~/.config/nvim:/home/user/.config/nvim
       - ~/.config/coc:/home/user/.config/coc
       - ~/.local/share/nvim/:/home/user/.local/share/nvim/
-      - ~/.shh:/home/user/.ssh
+      # - ~/.shh:/home/user/.ssh
     network_mode: "host"

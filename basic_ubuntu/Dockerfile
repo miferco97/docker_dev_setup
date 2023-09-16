@@ -20,6 +20,8 @@ RUN apt-get install nodejs -y
 RUN apt-get install python3-pip -y
 RUN pip3 install pynvim
 
+RUN apt install tmux -y
+
 ## create an user
 RUN useradd --create-home --shell /bin/bash $USERNAME && echo "$USERNAME:$PASSWD" | chpasswd && adduser $USERNAME sudo
 RUN echo "$USERNAME ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
