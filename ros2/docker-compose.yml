@@ -4,15 +4,21 @@ services:
     image: ros2:v2
     build:
       context: .
+      dockerfile: Dockerfile
     container_name: ros2_v2
     environment:
       DISPLAY: $DISPLAY
       XAUTHORITY: $XAUTHORITY
+      SSH_AUTH_SOCK: $SSH_AUTH_SOCK
     runtime: nvidia
+    privileged: true
+    restart: always
     volumes:
       # display related 
       - ~/.Xauthority:/root/.Xauthority
       - /tmp/.X11-unix:/tmp/.X11-unix
+      # ssh related
+      - $SSH_AUTH_SOCK:$SSH_AUTH_SOCK
       # nvim related
       - ~/.config/nvim:/root/.config/nvim
       - ~/.config/coc:/root/.config/coc
@@ -21,10 +27,8 @@ services:
       # tmux related
       - ~/.tmux:/root/.tmux
       - ~/.tmux.conf:/root/.tmux.conf
-      # ssh related
-      - ~/.ssh:/root/.ssh
       # working dirs
       - ~/aerostack2_ws:/root/aerostack2_ws
-
+      - ~/knowledge_graphs_ws:/root/knowledge_graphs_ws
     network_mode: "host"
     command: tail -f /dev/null

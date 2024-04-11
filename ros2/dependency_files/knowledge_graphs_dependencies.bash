@@ -1,0 +1,23 @@
+#[apt] Installation commands: -y && \ 
+  apt-get install ros-humble-rclcpp -y && \ 
+  apt-get install ros-humble-rclcpp-lifecycle -y && \ 
+  apt-get install ros-humble-ament-lint-common -y && \ 
+  apt-get install ros-humble-ament-lint-auto -y && \ 
+  apt-get install ros-humble-ament-index-cpp -y && \ 
+  apt-get install ros-humble-ament-copyright -y && \ 
+  apt-get install ros-humble-ament-flake8 -y && \ 
+  apt-get install ros-humble-ament-pep257 -y && \ 
+  apt-get install python3-pytest -y && \ 
+  apt-get install ros-humble-ament-cmake -y && \ 
+  apt-get install ros-humble-ament-cmake-python -y && \ 
+  apt-get install libreadline-dev -y && \ 
+  apt-get install ros-humble-rclpy -y && \ 
+  apt-get install ros-humble-ament-index-python -y && \ 
+  apt-get install ros-humble-python-qt-binding -y && \ 
+  apt-get install ros-humble-qt-dotgraph -y && \ 
+  apt-get install ros-humble-rqt-gui -y && \ 
+  apt-get install ros-humble-rqt-gui-py -y && \ 
+  apt-get install ros-humble-builtin-interfaces -y && \ 
+  apt-get install ros-humble-rosidl-default-generators -y && \ 
+  apt-get install libsqlite3-dev -y && \
+echo dependecies installed correctly

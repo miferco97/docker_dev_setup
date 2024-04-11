@@ -33,6 +33,13 @@ RUN apt install ros-dev-tools git -y
 RUN rosdep update
 COPY ./dependency_files/ /root/dependency_files/
 
+RUN git config --global --add safe.directory '*'
+RUN apt install cppcheck -y
+RUN pip3 install cpplint
+
 RUN for file in /root/dependency_files/*; do chmod +x $file; bash $file; done
 RUN rm -rf /root/dependency_files
-RUN echo 'source /opt/ros/humble/setup.bash' >> ~/.bashrc
+
+COPY ./entrypoint.sh /root/entrypoint.sh
+RUN chmod +x /root/entrypoint.sh
+ENTRYPOINT ["bash", "/root/entrypoint.sh"]
