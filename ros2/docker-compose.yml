@@ -1,19 +1,30 @@
 version: '3.3'
 services:
-  aerostack2:
-    image: aerostack2
-    container_name: aerostack2
-    command: tail -F anything 
+  ros2:
+    image: ros2:v2
+    build:
+      context: .
+    container_name: ros2_v2
     environment:
       DISPLAY: $DISPLAY
+      XAUTHORITY: $XAUTHORITY
+    runtime: nvidia
     volumes:
-      - /tmp/.X11-unix:/tmp/.X11-unix
+      # display related 
       - ~/.Xauthority:/root/.Xauthority
-      - ~/.tmux:/home/user/.tmux
-      - ~/.tmux.conf:/home/user/.tmux.conf
-      - ~/.config/nvim:/home/user/.config/nvim
-      - ~/.config/coc:/home/user/.config/coc
-      - ~/.local/share/nvim/:/home/user/.local/share/nvim/
-      - ~/aerostack2_ws/:/home/user/aerostack2_ws
-      # - ~/.shh:/home/user/.ssh
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      # nvim related
+      - ~/.config/nvim:/root/.config/nvim
+      - ~/.config/coc:/root/.config/coc
+      - ~/.config/github-copilot:/root/.config/github-copilot
+      - ~/.local/share/nvim/:/root/.local/share/nvim/
+      # tmux related
+      - ~/.tmux:/root/.tmux
+      - ~/.tmux.conf:/root/.tmux.conf
+      # ssh related
+      - ~/.ssh:/root/.ssh
+      # working dirs
+      - ~/aerostack2_ws:/root/aerostack2_ws
+
     network_mode: "host"
+    command: tail -f /dev/null

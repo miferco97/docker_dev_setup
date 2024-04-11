@@ -1,6 +1,7 @@
 FROM osrf/ros:humble-desktop
 
-#create an user with a /home/user directory
+WORKDIR /root/
+
 RUN apt update
 RUN apt-get install apt-utils sudo software-properties-common -y
 
@@ -16,17 +17,24 @@ RUN echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesourc
 RUN apt-get update
 RUN apt-get install nodejs -y
 RUN apt-get install python3-pip -y
+RUN pip3 install pynvim
 
+# this folders are for nvim
+RUN mkdir .config
+RUN mkdir .local/share -p
+RUN echo 'alias vim=nvim' >> ~/.bashrc
 
+RUN sudo apt install tmux tmuxinator -y
 ## ROS2 utils
 
 RUN apt install git python3-rosdep python3-pip python3-colcon-common-extensions -y
 RUN apt install ros-dev-tools git -y
 
-RUN pip3 install pynvim
-RUN mkdir .config
-RUN mkdir .local/share -p
+RUN rosdep update
+COPY ./dependency_files/ /root/dependency_files/
 
-RUN sudo apt install tmux tmuxinator -y
-
+RUN for file in /root/dependency_files/*; do chmod +x $file; bash $file; done
+RUN rm -rf /root/dependency_files
 RUN echo 'source /opt/ros/humble/setup.bash' >> ~/.bashrc
+RUN echo 'export AEROSTACK2_PATH=/root/aerostack2_ws/src/aerostack2/' >> ~/.bashrc
+RUN echo 'source $AEROSTACK2_PATH/as2_cli/setup_env.bash' >> ~/.bashrc 
