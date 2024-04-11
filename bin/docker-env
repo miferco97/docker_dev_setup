@@ -1,0 +1,153 @@
+#!/bin/bash
+
+# CLI util for runing docker compose from anywhere
+
+
+usage() {
+  echo "Usage: docker-env [command]"
+  echo "Commands:"
+  echo "  up <project_name> - Start the project"
+  echo "  down <project_name> - Stop the project"
+  echo "  restart <project_name> - Restart the project"
+  echo "  build <project_name> - Build the project"
+  echo "  list - List all projects"
+  echo "  --help - Show this help"
+  exit 1
+}
+
+# find the path of the executable script
+SCRIPT_PATH=$(readlink -f "$0")
+SCRIPT_DIR=$(dirname "$SCRIPT_PATH")
+PROJECTS_DIR=$(dirname "$SCRIPT_DIR")
+
+# list all projects
+# projects are directories in the same directory as the script without the bin directory and occluded files
+
+list_projects() {
+  folders=$(find $PROJECTS_DIR -maxdepth 1  -type d -not -name ".*" -not -name "bin" -wholename "$PROJECTS_DIR/*")
+  for folder in $folders; do
+    echo $(basename $folder)
+  done
+}
+
+search_project() {
+  project=$1
+  if [ -z $project ]; then
+    echo "Project name is required"
+    exit 1
+  fi
+  list=$(list_projects)
+  for item in $list; do
+    if [ $item == $project ]; then
+      return 0
+    fi
+  done
+}
+
+
+# check if the first argument is a valid project
+if [ $# -lt 1 ]; then
+  usage
+fi
+
+# check if the first argument is a valid command
+# if not, show usage
+# if it is, run the command
+
+check_is_running() {
+  project=$1
+  search_project $project
+  if [ $? -eq 0 ]; then
+    container=$(grep container_name $PROJECTS_DIR/$project/docker-compose.yml | awk '{print $2}')
+    running=$(docker ps -q -f name=$container)
+    if [ -z $running ]; then
+      return 1
+    else
+      return 0
+    fi
+  else
+    echo "Project not found"
+    exit 1
+  fi
+}
+
+up() {
+  project=$1
+  search_project $project
+  if [ $? -eq 0 ]; then
+    if check_is_running $project; then
+      echo "Project is already running"
+    else
+      # check if the project is already running
+      # if it is, show a message
+      # if not, start the project
+      docker compose -f $PROJECTS_DIR/$project/docker-compose.yml up -d
+    fi
+    #parse the container name from the docker-compose file
+    container=$(grep container_name $PROJECTS_DIR/$project/docker-compose.yml | awk '{print $2}')
+    docker exec -it $container /bin/bash
+  else
+    echo "Project not found"
+  fi
+}
+
+down() {
+  project=$1
+  search_project $project
+  if [ $? -eq 0 ]; then
+    docker compose -f $PROJECTS_DIR/$project/docker-compose.yml down
+  else
+    echo "Project not found"
+  fi
+}
+
+restart() {
+  project=$1
+  search_project $project
+  if [ $? -eq 0 ]; then
+    docker compose -f $PROJECTS_DIR/$project/docker-compose.yml restart
+  else
+    echo "Project not found"
+  fi
+}
+
+build() {
+  project=$1
+  search_project $project
+  if [ $? -eq 0 ]; then
+    docker compose -f $PROJECTS_DIR/$project/docker-compose.yml build
+  else
+    echo "Project not found"
+  fi
+}
+
+case $1 in
+  up)
+    up $2
+    ;;
+  down)
+    down $2
+    ;;
+  restart)
+    restart $2
+    ;;
+  build)
+    build $2
+    ;;
+  list)
+    list_projects
+    ;;
+  --help)
+    usage
+    ;;
+  *)
+    usage
+    ;;
+esac
+
+exit 0
+```
+
+
+
+
