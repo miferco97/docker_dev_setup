@@ -27,6 +27,8 @@ services:
       # tmux related
       - ~/.tmux:/root/.tmux
       - ~/.tmux.conf:/root/.tmux.conf
+      # git
+      - ~/.gitconfig:/root/.gitconfig_local
       # working dirs
       - ~/aerostack2_ws:/root/aerostack2_ws
       - ~/knowledge_graphs_ws:/root/knowledge_graphs_ws

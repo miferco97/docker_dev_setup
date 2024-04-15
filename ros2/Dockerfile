@@ -18,6 +18,7 @@ RUN apt-get update
 RUN apt-get install nodejs -y
 RUN apt-get install python3-pip -y
 RUN pip3 install pynvim
+RUN apt-get install ripgrep -y
 
 # this folders are for nvim
 RUN mkdir .config
@@ -33,13 +34,20 @@ RUN apt install ros-dev-tools git -y
 RUN rosdep update
 COPY ./dependency_files/ /root/dependency_files/
 
-RUN git config --global --add safe.directory '*'
+
 RUN apt install cppcheck -y
 RUN pip3 install cpplint
 
 RUN for file in /root/dependency_files/*; do chmod +x $file; bash $file; done
 RUN rm -rf /root/dependency_files
 
-COPY ./entrypoint.sh /root/entrypoint.sh
-RUN chmod +x /root/entrypoint.sh
-ENTRYPOINT ["bash", "/root/entrypoint.sh"]
+
+RUN apt install python3-colcon-mixin
+RUN colcon mixin update default
+RUN rm -rf log # remove log folder
+RUN pip3 install colcon-lcov-result
+RUN apt install lcov -y
+
+COPY ./entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT ["bash", "/entrypoint.sh"]

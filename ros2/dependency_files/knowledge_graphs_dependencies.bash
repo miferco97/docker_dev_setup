@@ -20,4 +20,5 @@
   apt-get install ros-humble-builtin-interfaces -y && \ 
   apt-get install ros-humble-rosidl-default-generators -y && \ 
   apt-get install libsqlite3-dev -y && \
+  apt-get install ros-humble-backward-ros -y && \
 echo dependecies installed correctly
