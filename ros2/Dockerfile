@@ -1,4 +1,4 @@
-FROM osrf/ros:humble-desktop
+FROM aerostack2/nightly-humble:latest
 
 WORKDIR /root/
 
@@ -28,19 +28,12 @@ RUN echo 'alias vim=nvim' >> ~/.bashrc
 RUN sudo apt install tmux tmuxinator -y
 ## ROS2 utils
 
-RUN apt install git python3-rosdep python3-pip python3-colcon-common-extensions -y
-RUN apt install ros-dev-tools git -y
-
-RUN rosdep update
-COPY ./dependency_files/ /root/dependency_files/
-
-
 RUN apt install cppcheck -y
 RUN pip3 install cpplint
 
+COPY ./dependency_files /root/dependency_files
 RUN for file in /root/dependency_files/*; do chmod +x $file; bash $file; done
 RUN rm -rf /root/dependency_files
-
 
 RUN apt install python3-colcon-mixin
 RUN colcon mixin update default

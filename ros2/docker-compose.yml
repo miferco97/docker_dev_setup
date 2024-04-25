@@ -30,7 +30,8 @@ services:
       # git
       - ~/.gitconfig:/root/.gitconfig_local
       # working dirs
-      - ~/aerostack2_ws:/root/aerostack2_ws
+      # - ~/aerostack2_ws:/root/aerostack2_ws
+      - ~/clean_as2:/root/aerostack2_ws
       - ~/knowledge_graphs_ws:/root/knowledge_graphs_ws
     network_mode: "host"
     command: tail -f /dev/null
