@@ -1,10 +1,12 @@
 services:
-  aerostack2:
-    image: aerostack2
+  coresense_ros2:
+    image: coresense_ros2
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: aerostack2
+      ssh:
+        - default
+    container_name: coresense_ros2
     environment:
       DISPLAY: $DISPLAY
       XAUTHORITY: $XAUTHORITY
@@ -18,16 +20,16 @@ services:
       # ssh related
       - $SSH_AUTH_SOCK:$SSH_AUTH_SOCK
       # nvim related
-      - ~/.config/nvim:/root/.config/nvim:rw
-      - ~/.config/coc:/root/.config/coc:rw
-      - ~/.config/github-copilot:/root/.config/github-copilot:rw
-      - ~/.local/share/nvim/:/root/.local/share/nvim/:rw
+      - ~/.config/nvim:/root/.config/nvim
+      - ~/.config/coc:/root/.config/coc
+      - ~/.config/github-copilot:/root/.config/github-copilot
+      - ~/.local/share/nvim/:/root/.local/share/nvim/
       # tmux related
       - ~/.tmux:/root/.tmux:ro
       - ~/.tmux.conf:/root/.tmux.conf:ro
       # git
-      - ~/.gitconfig:/root/.gitconfig_local
+      - ~/.gitconfig:/root/.gitconfig_local:ro
       # working dirs
-      - ./workspace:/root/aerostack2_ws/:rw
+      - ./workspace:/root/workspace/
     network_mode: "host"
     command: tail -f /dev/null
