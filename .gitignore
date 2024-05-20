@@ -2,5 +2,7 @@ coresense/workspace/*
 !coresense/workspace/.gitkeep
 aerostack2/workspace/*
 !aerostack2/workspace/.gitkeep
+crazyflie/workspace/*
+!crazyflie/workspace/.gitkeep
 .gitconfig
 

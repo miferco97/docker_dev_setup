@@ -1,0 +1,35 @@
+services:
+  crazyflie:
+    image: crazyflie
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: crazyflie
+    environment:
+      DISPLAY: $DISPLAY
+      XAUTHORITY: $XAUTHORITY
+      SSH_AUTH_SOCK: $SSH_AUTH_SOCK
+    privileged: true
+    restart: always
+    volumes:
+      # display related 
+      - ~/.Xauthority:/root/.Xauthority:rw
+      # ssh related
+      - $SSH_AUTH_SOCK:$SSH_AUTH_SOCK
+      # nvim related
+      - ~/.config/nvim:/root/.config/nvim:rw
+      - ~/.config/coc:/root/.config/coc:rw
+      - ~/.config/github-copilot:/root/.config/github-copilot:rw
+      - ~/.local/share/nvim/:/root/.local/share/nvim/:rw
+      # tmux related
+      - ~/.tmux:/root/.tmux:ro
+      - ~/.tmux.conf:/root/.tmux.conf:ro
+      # git
+      - ~/.gitconfig:/root/.gitconfig_local
+      # dev
+      - /dev/:/dev
+      # workspace
+      - ./workspace/crazyflie-firmware:/root/crazyflie-firmware
+      - ./workspace/aideck-gap8-examples:/root/aideck-gap8-examples
+    network_mode: "host"
+    command: tail -f /dev/null
