@@ -31,5 +31,6 @@ services:
       # workspace
       - ./workspace/crazyflie-firmware:/root/crazyflie-firmware
       - ./workspace/aideck-gap8-examples:/root/aideck-gap8-examples
+      - ./workspace/platforms_ws/:/root/platforms_ws
     network_mode: "host"
     command: tail -f /dev/null
