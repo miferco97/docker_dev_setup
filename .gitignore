@@ -4,5 +4,6 @@ aerostack2/workspace/*
 !aerostack2/workspace/.gitkeep
 crazyflie/workspace/*
 !crazyflie/workspace/.gitkeep
+!crazyflie/workspace/repositories.repos
 .gitconfig
 

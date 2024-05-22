@@ -1,0 +1,16 @@
+repositories:
+  aideck-gap8-examples:
+    type: git
+    url: https://github.com/bitcraze/aideck-gap8-examples.git
+    version: master
+  crazyflie-firmware:
+    type: git
+    url: https://github.com/bitcraze/crazyflie-firmware.git
+    version: master
+  platform_ws/src/as2_crazyflie_platform:
+    type: git
+    url: https://github.com/aerostack2/as2_crazyflie_platform.git
+    version: master
+    
+
+
