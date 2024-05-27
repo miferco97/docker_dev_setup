@@ -15,7 +15,7 @@ services:
       # display related 
       - ~/.Xauthority:/root/.Xauthority:rw
       # ssh related
-      - $SSH_AUTH_SOCK:$SSH_AUTH_SOCK
+      - $SSH_AUTH_SOCK:$SSH_AUTH_SOCK:ro
       # nvim related
       - ~/.config/nvim:/root/.config/nvim:rw
       - ~/.config/coc:/root/.config/coc:rw
@@ -31,6 +31,6 @@ services:
       # workspace
       - ./workspace/crazyflie-firmware:/root/crazyflie-firmware
       - ./workspace/aideck-gap8-examples:/root/aideck-gap8-examples
-      - ./workspace/platforms_ws/:/root/platforms_ws
+      - ./workspace/platforms_ws/:/root/aideck-gap8-examples
     network_mode: "host"
     command: tail -f /dev/null

@@ -6,4 +6,4 @@ crazyflie/workspace/*
 !crazyflie/workspace/.gitkeep
 !crazyflie/workspace/repositories.repos
 .gitconfig
-
+sysml2/workspace/*
