@@ -1,0 +1,45 @@
+services:
+  vio_ros:
+    image: a2rl_final 
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: a2rl_final
+    environment:
+      DISPLAY: $DISPLAY
+      XAUTHORITY: $XAUTHORITY
+      SSH_AUTH_SOCK: $SSH_AUTH_SOCK
+      NVIDIA_VISIBLE_DEVICES: all
+      NVIDIA_DRIVER_CAPABILITIES: all
+      TERM: $TERM
+      SHELL: $SHELL
+      ROS_LOCALHOST_ONLY: 1
+      RMW_IMPLEMENTATION: rmw_cyclonedds_cpp
+    runtime: nvidia
+    privileged: true
+    restart: always
+    volumes:
+      # display related 
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ~/.Xauthority:/root/.Xauthority:rw
+      # ssh related
+      - $SSH_AUTH_SOCK:$SSH_AUTH_SOCK
+      # nvim related
+      - ~/.config/nvim:/root/.config/nvim:rw
+      - ~/.config/coc:/root/.config/coc:rw
+      - ~/.config/github-copilot:/root/.config/github-copilot:rw
+      - ~/.local/share/nvim/:/root/.local/share/nvim/:rw
+      # tmux related
+      - ~/.tmux:/root/.tmux:ro
+      - ~/.tmux.conf:/root/.tmux.conf:ro
+      # git
+      - ~/.gitconfig:/root/.gitconfig_local
+      # working dirs
+      - ./workspace:/root/aerostack2_ws/:rw
+      - ./rosbags:/root/rosbags/:rw
+      - ./checkpoints:/root/checkpoints/:rw
+      # dev
+      - /dev:/dev:rw
+      # rosbag
+    network_mode: "host"
+    command: tail -f /dev/null
