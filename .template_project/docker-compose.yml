@@ -1,23 +1,34 @@
 services:
-  crazyflie:
-    image: crazyflie
+  {{ project_name }}:
+    image: {{ project_name }}
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: crazyflie
+    container_name: {{ project_name }}
     environment:
       DISPLAY: $DISPLAY
       XAUTHORITY: $XAUTHORITY
       SSH_AUTH_SOCK: $SSH_AUTH_SOCK
       TERM: $TERM
       SHELL: $SHELL
+    {{ % if gpu % }}
+      NVIDIA_VISIBLE_DEVICES: all
+      NVIDIA_DRIVER_CAPABILITIES: all
+    {{ % endif % }}
+      ROS_LOCALHOST_ONLY: 1
+      RMW_IMPLEMENTATION: rmw_cyclonedds_cpp
+    {{ % if gpu % }}
+    runtime: nvidia
+    {{ % endif % }}
+    {{ % if privileged % }}
     privileged: true
+    {{ % endif % }}
     restart: always
     volumes:
       # display related 
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
       - ~/.Xauthority:/root/.Xauthority:rw
-      # ssh related
-      - $SSH_AUTH_SOCK:$SSH_AUTH_SOCK:ro
+      - $SSH_AUTH_SOCK:$SSH_AUTH_SOCK
       # nvim related
       - ~/.config/nvim:/root/.config/nvim:rw
       - ~/.config/coc:/root/.config/coc:rw
@@ -28,11 +39,11 @@ services:
       - ~/.tmux.conf:/root/.tmux.conf:ro
       # git
       - ~/.gitconfig:/root/.gitconfig_local
+      # working dirs
+      - ./workspace:/root/aerostack2_ws/:rw
+    {{ % if privileged % }}
       # dev
-      - /dev/:/dev
-      # workspace
-      - ./workspace/crazyflie-firmware:/root/crazyflie-firmware
-      - ./workspace/aideck-gap8-examples:/root/aideck-gap8-examples
-      - ./workspace/aerostack2_ws/:/root/aerostack2_ws
+      - /dev:/dev:rw
+    {{ % endif % }}
     network_mode: "host"
     command: tail -f /dev/null

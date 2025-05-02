@@ -1,7 +1,7 @@
 version: '3.3'
 services:
   container:
-    image: ubuntu_basic
+    image: ubuntu:20.04
     container_name: ubuntu_basic
     command: tail -F anything 
     environment:

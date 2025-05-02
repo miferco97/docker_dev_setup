@@ -2,7 +2,6 @@
 
 # CLI util for runing docker compose from anywhere
 
-
 usage() {
   echo "Usage: docker-env [command]"
   echo "Commands:"
@@ -10,6 +9,7 @@ usage() {
   echo "  down <project_name> - Stop the project"
   echo "  restart <project_name> - Restart the project"
   echo "  build <project_name> - Build the project"
+  echo "  setup <project_name> - Setup the project"
   echo "  list - List all projects"
   echo "  --help - Show this help"
   exit 1
@@ -82,6 +82,7 @@ up() {
       # if it is, show a message
       # if not, start the project
       docker compose -f $PROJECTS_DIR/$project/docker-compose.yml up -d
+      xhost + 
     fi
     #parse the container name from the docker-compose file
     container=$(grep container_name $PROJECTS_DIR/$project/docker-compose.yml | awk '{print $2}')
@@ -121,6 +122,21 @@ build() {
   fi
 }
 
+setup() {
+  # create the project if it does not exist
+  # each project is a directory in the same directory as the script and contains
+  # a docker-compose.yml file
+  # the project name is the name of the directory
+  project=$1
+  search_project $project
+  if [ $? -eq 0 ]; then
+    docker compose -f $PROJECTS_DIR/$project/docker-compose.yml up -d --build
+    xhost +
+  else
+    echo "Project not found"
+  fi
+}
+
 case $1 in
   up)
     up $2
@@ -137,6 +153,9 @@ case $1 in
   list)
     list_projects
     ;;
+  setup)
+    setup $2
+    ;;
   --help)
     usage
     ;;
@@ -146,8 +165,4 @@ case $1 in
 esac
 
 exit 0
-```
-
-
-
 

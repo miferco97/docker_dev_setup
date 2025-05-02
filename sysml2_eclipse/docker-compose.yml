@@ -1,0 +1,17 @@
+services:
+  sysml2_eclipse:
+    image: sysml2_eclipse:installed
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sysml2_eclipse
+    environment:
+      DISPLAY: $DISPLAY
+      XAUTHORITY: $XAUTHORITY
+    volumes:
+      # display related 
+      - ~/.Xauthority:/root/.Xauthority:rw
+      # display related 
+      - ./workspace:/root/workspace/
+    network_mode: "host"
+    command: tail -f /dev/null

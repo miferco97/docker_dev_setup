@@ -1,0 +1,12 @@
+services:
+  sysml2:
+    image: sysml2
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sysml2
+    volumes:
+      # display related 
+      - ./workspace:/root/workspace/
+    network_mode: "host"
+    command: tail -f /dev/null

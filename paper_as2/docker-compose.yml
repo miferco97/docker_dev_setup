@@ -1,23 +1,24 @@
 services:
-  crazyflie:
-    image: crazyflie
+  paper_as2:
+    image: paper_as2 
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: crazyflie
+    container_name: paper_as2
     environment:
       DISPLAY: $DISPLAY
       XAUTHORITY: $XAUTHORITY
       SSH_AUTH_SOCK: $SSH_AUTH_SOCK
       TERM: $TERM
       SHELL: $SHELL
+    runtime: nvidia
     privileged: true
     restart: always
     volumes:
       # display related 
       - ~/.Xauthority:/root/.Xauthority:rw
       # ssh related
-      - $SSH_AUTH_SOCK:$SSH_AUTH_SOCK:ro
+      - $SSH_AUTH_SOCK:$SSH_AUTH_SOCK
       # nvim related
       - ~/.config/nvim:/root/.config/nvim:rw
       - ~/.config/coc:/root/.config/coc:rw
@@ -28,11 +29,10 @@ services:
       - ~/.tmux.conf:/root/.tmux.conf:ro
       # git
       - ~/.gitconfig:/root/.gitconfig_local
-      # dev
+      # working dirs
+      - ./as2_ws/:/root/aerostack2_ws/:rw
+      - ./workspace/:/root/workspace/:rw
       - /dev/:/dev
-      # workspace
-      - ./workspace/crazyflie-firmware:/root/crazyflie-firmware
-      - ./workspace/aideck-gap8-examples:/root/aideck-gap8-examples
-      - ./workspace/aerostack2_ws/:/root/aerostack2_ws
+      # - /media/miguel/CVAR_Miguel/wind_measurement/rosbags:/root/rosbags
     network_mode: "host"
     command: tail -f /dev/null

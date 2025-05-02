@@ -20,27 +20,24 @@ RUN mkdir .config
 RUN mkdir .local/share -p
 
 RUN apt-get install tmux tmuxinator -y
-RUN apt-get install ros-humble-mavros ros-humble-mavros-extras -y
-WORKDIR /tmp/
-RUN wget https://raw.githubusercontent.com/mavlink/mavros/ros2/mavros/scripts/install_geographiclib_datasets.sh 
-RUN chmod +x install_geographiclib_datasets.sh
-RUN ./install_geographiclib_datasets.sh
-WORKDIR /root/
-
-# Setup Cyclone and Zenoh
-
-RUN echo "deb [trusted=yes] https://download.eclipse.org/zenoh/debian-repo/ /" | sudo tee -a /etc/apt/sources.list > /dev/null
-RUN apt update && apt install ros-humble-rmw-cyclonedds-cpp zenoh-bridge-ros2dds -y
-RUN echo 'export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp' >> ~/.bashrc
-#RUN echo 'export ROS_LOCALHOST_ONLY=0' >> ~/.bashrc
-
-WORKDIR /root/aerostack2_ws/src
-RUN git clone https://github.com/aerostack2/aerostack2_viz.git
-RUN rosdep install --from-paths aerostack2_viz --ignore-src -r -y
 
 RUN apt-get install cpplint cppcheck -y
 RUN pip install cmakelint -U
 
+# Gazebo Fortress clean uninstall
+RUN apt remove ignition* -y
+RUN apt autoremove -y
+
+# Install Gazebo Harmonic
+RUN apt-get install lsb-release wget gnupg && apt-get update
+RUN wget https://packages.osrfoundation.org/gazebo.gpg -O /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg
+RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null
+RUN apt-get update && apt-get install -y -q gz-harmonic
+
+# Install ros-gazebo dependencies
+RUN apt update && apt install ros-humble-ros-gzharmonic -y
+
+RUN apt-get install -y --no-install-recommends libasio-dev
 COPY ./entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 ENTRYPOINT ["bash", "/entrypoint.sh"]

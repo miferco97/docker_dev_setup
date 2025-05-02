@@ -9,6 +9,8 @@ services:
       DISPLAY: $DISPLAY
       XAUTHORITY: $XAUTHORITY
       SSH_AUTH_SOCK: $SSH_AUTH_SOCK
+      TERM: $TERM
+      SHELL: $SHELL
     runtime: nvidia
     privileged: true
     restart: always
@@ -29,5 +31,10 @@ services:
       - ~/.gitconfig:/root/.gitconfig_local
       # working dirs
       - ./workspace:/root/aerostack2_ws/:rw
+      - /dev/:/dev
+      - ~/project_mavlink:/root/project_mavlink:rw
+      # - /media/miguel/CVAR_Miguel/wind_measurement/rosbags:/root/rosbags
+      # - /media/miguel/CVAR_Miguel1/wind_measurement/rosbags:/root/rosbags
+      - ~/Downloads/wind_measurement_2_flights/wind_measurement/rosbags:/root/rosbags
     network_mode: "host"
     command: tail -f /dev/null

@@ -28,7 +28,6 @@ RUN pip3 install --upgrade pip
 RUN pip3 install cfclient
 RUN apt install udev usbutils -y
 
-
 # RUN groupadd plugdev
 RUN usermod -aG plugdev root
 
@@ -40,6 +39,7 @@ RUN apt-get install make gcc-arm-none-eabi build-essential libncurses5-dev -y
 # RUN git clone --recursive https://github.com/bitcraze/crazyflie-firmware.git
 # RUN git clone https://github.com/bitcraze/aideck-gap8-examples
 
+RUN apt-get install ros-humble-rmw-cyclonedds-cpp -y
 
 COPY ./entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
