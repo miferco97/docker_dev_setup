@@ -1,0 +1,16 @@
+#!/bin/bash
+
+_docker_env() {
+  local cur prev
+  COMPREPLY=()
+  cur="${COMP_WORDS[COMP_CWORD]}"
+  prev="${COMP_WORDS[COMP_CWORD-1]}"
+  if [[ $prev == "up" || $prev == "down" || $prev == "restart" || $prev == "build" ]]; then
+    COMPREPLY=( $(compgen -W "$(docker-env list)" -- "$cur") )
+  else
+    COMMANDS=$(docker-env -h | awk 'NR>2' | awk '{print $1}')
+    COMPREPLY=( $(compgen -W "$COMMANDS" -- "$cur") )
+  fi
+}
+
+complete -F _docker_env docker-env
