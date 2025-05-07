@@ -1,35 +1,41 @@
 services:
-  coresense_ros2:
-    image: coresense_ros2
+  vs_graphs:
+    image: vs_graphs 
     build:
       context: .
       dockerfile: Dockerfile
-      ssh:
-        - default
-    container_name: coresense_ros2
+    container_name: vs_graphs
     environment:
       DISPLAY: $DISPLAY
       XAUTHORITY: $XAUTHORITY
       SSH_AUTH_SOCK: $SSH_AUTH_SOCK
+      NVIDIA_VISIBLE_DEVICES: all
+      NVIDIA_DRIVER_CAPABILITIES: all
+      TERM: $TERM
+      SHELL: $SHELL
     runtime: nvidia
     privileged: true
     restart: always
     volumes:
       # display related 
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
       - ~/.Xauthority:/root/.Xauthority:rw
       # ssh related
       - $SSH_AUTH_SOCK:$SSH_AUTH_SOCK
       # nvim related
-      - ~/.config/nvim:/root/.config/nvim
-      - ~/.config/coc:/root/.config/coc
-      - ~/.config/github-copilot:/root/.config/github-copilot
-      - ~/.local/share/nvim/:/root/.local/share/nvim/
+      - ~/.config/nvim:/root/.config/nvim:rw
+      - ~/.config/coc:/root/.config/coc:rw
+      - ~/.config/github-copilot:/root/.config/github-copilot:rw
+      - ~/.local/share/nvim/:/root/.local/share/nvim/:rw
       # tmux related
       - ~/.tmux:/root/.tmux:ro
       - ~/.tmux.conf:/root/.tmux.conf:ro
       # git
-      - ~/.gitconfig:/root/.gitconfig_local:ro
+      - ~/.gitconfig:/root/.gitconfig_local
       # working dirs
-      - ./workspace:/root/workspace/
+      - ./workspace:/root/workspace/:rw
+      # dev
+      - /dev:/dev:rw
+      # rosbag
     network_mode: "host"
     command: tail -f /dev/null

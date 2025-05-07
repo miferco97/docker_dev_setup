@@ -1,12 +1,16 @@
 #!/bin/bash
 
+export PATH=$PATH:~/docker_dev_setup/.bin/
+
 _docker_env() {
   local cur prev
   COMPREPLY=()
   cur="${COMP_WORDS[COMP_CWORD]}"
   prev="${COMP_WORDS[COMP_CWORD-1]}"
-  if [[ $prev == "up" || $prev == "down" || $prev == "restart" || $prev == "build" ]]; then
-    COMPREPLY=( $(compgen -W "$(docker-env list)" -- "$cur") )
+  if [[ $prev == "up" || $prev == "build" ]]; then
+    COMPREPLY=( $(compgen -W "$(docker-env list -p)" -- "$cur") )
+  elif [[  $prev == "down" || $prev == "restart" ]]; then
+    COMPREPLY=( $(compgen -W "$(docker-env list -r)" -- "$cur") )
   else
     COMMANDS=$(docker-env -h | awk 'NR>2' | awk '{print $1}')
     COMPREPLY=( $(compgen -W "$COMMANDS" -- "$cur") )

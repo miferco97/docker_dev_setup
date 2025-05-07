@@ -15,12 +15,14 @@ services:
       NVIDIA_VISIBLE_DEVICES: all
       NVIDIA_DRIVER_CAPABILITIES: all
     {{ % endif % }}
+    {{ % if ros == "2" %}}
       ROS_LOCALHOST_ONLY: 1
       RMW_IMPLEMENTATION: rmw_cyclonedds_cpp
+    {{ % endif % }}
     {{ % if gpu % }}
     runtime: nvidia
     {{ % endif % }}
-    {{ % if privileged % }}
+    {{ % if privileged or gpu % }}
     privileged: true
     {{ % endif % }}
     restart: always
@@ -29,19 +31,21 @@ services:
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
       - ~/.Xauthority:/root/.Xauthority:rw
       - $SSH_AUTH_SOCK:$SSH_AUTH_SOCK
+    {{ % if nvim % }}
       # nvim related
       - ~/.config/nvim:/root/.config/nvim:rw
       - ~/.config/coc:/root/.config/coc:rw
       - ~/.config/github-copilot:/root/.config/github-copilot:rw
       - ~/.local/share/nvim/:/root/.local/share/nvim/:rw
+    {{ % endif % }}
       # tmux related
       - ~/.tmux:/root/.tmux:ro
       - ~/.tmux.conf:/root/.tmux.conf:ro
       # git
       - ~/.gitconfig:/root/.gitconfig_local
       # working dirs
-      - ./workspace:/root/aerostack2_ws/:rw
-    {{ % if privileged % }}
+      - ./workspace:/root/workspace:rw
+    {{ % if privileged or gpu % }}
       # dev
       - /dev:/dev:rw
     {{ % endif % }}

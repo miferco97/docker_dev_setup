@@ -2,6 +2,9 @@
 
 # CLI util for runing docker compose from anywhere
 
+# autocompletion
+
+
 usage() {
   echo "Usage: docker-env [command]"
   echo "Commands:"
@@ -24,10 +27,48 @@ PROJECTS_DIR=$(dirname "$SCRIPT_DIR")
 # projects are directories in the same directory as the script without the bin directory and occluded files
 
 list_projects() {
+  # first check the rest of arguments
+
+  # without args showing all projects but if the project is running, show it in yellow with [running] 
+  # -r for showing only the running projects
+  # -p for showing only names of all projects plainly
+  
   folders=$(find $PROJECTS_DIR -maxdepth 1  -type d -not -name ".*" -not -name "bin" -wholename "$PROJECTS_DIR/*")
+  # sorting the folders by name
+  folders=$(echo $folders | tr ' ' '\n' | sort | tr '\n' ' ')
+  lines_to_echo=""
+  lines_to_echo_running=""
   for folder in $folders; do
-    echo $(basename $folder)
+    container=$(grep container_name $folder/docker-compose.yml | awk '{print $2}')
+    running=$(docker ps -q -f name=$container)
+
+    if [ "$1" == "-p" ]; then
+      lines_to_echo+=$(basename $folder)" "
+    elif [ "$1" == "-r" ]; then
+      if [ ! -z $running ]; then
+        lines_to_echo+=$(basename $folder)" "
+      fi
+    else
+      if [ ! -z $running ]; then
+        lines_to_echo_running+=$(basename $folder)" "
+      else
+        lines_to_echo+=$(basename $folder)" "
+      fi
+    fi
   done
+  #sort both lines
+  lines_to_echo_running=$(echo $lines_to_echo_running | tr ' ' '\n' | sort | tr '\n' ' ')
+  lines_to_echo=$(echo $lines_to_echo | tr ' ' '\n' | sort | tr '\n' ' ')
+
+  # echo the lines running in yellow
+  # echo the lines not running in white
+  for line in $lines_to_echo_running; do
+      echo -e "\033[33m$line [running]\033[0m"
+  done
+  for line in $lines_to_echo; do
+      echo -e $line
+  done
+
 }
 
 search_project() {
@@ -122,6 +163,7 @@ build() {
   fi
 }
 
+
 setup() {
   # create the project if it does not exist
   # each project is a directory in the same directory as the script and contains
@@ -151,7 +193,7 @@ case $1 in
     build $2
     ;;
   list)
-    list_projects
+    list_projects $2
     ;;
   setup)
     setup $2
@@ -165,4 +207,6 @@ case $1 in
 esac
 
 exit 0
+
+
 

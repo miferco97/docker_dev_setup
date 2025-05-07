@@ -8,3 +8,11 @@ As this containers are ment for developing and not for deploying there are sever
  - Neovim and tmux config are imported from the host machine: a lot of volumes are created related with this and some dependencies inside the Dockerfiles.
  - SSH keys can be forwarded by uncommenting .ssh folder line in docker-compose.yml
 
+
+## Setup docker-env cli 
+
+In your ```~/.bashrc``` append the following lines:
+
+```
+source ~/docker_dev_setup/.bin/autocomplete_docker_dev_setup
+```
