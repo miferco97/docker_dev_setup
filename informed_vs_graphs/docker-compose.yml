@@ -1,0 +1,30 @@
+services:
+  informed_vsgraphs_ros2:
+    image: informed_vsgraphs_ros2
+    build:
+      context: .
+      dockerfile: Dockerfile
+      ssh:
+        - default
+    container_name: informed_vsgraphs_ros2
+    environment:
+      DISPLAY: $DISPLAY
+      XAUTHORITY: $XAUTHORITY
+      NVIDIA_VISIBLE_DEVICES: all
+      NVIDIA_DRIVER_CAPABILITIES: all
+    runtime: nvidia
+    privileged: true
+    restart: always
+    volumes:
+      # display related
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      # dev
+      - /dev:/dev:rw
+      # dev
+      - ~/.Xauthority:/home/$USERNAME/.Xauthority:rw
+      # working dirs
+      - ./workspace:/home/$USERNAME/workspace:rw
+      - ./tools/:/home/$USERNAME/tools:rw
+      # rosbag
+      - ./rosbags/:/home/$USERNAME/rosbags:rw
+    command: tail -f /dev/null

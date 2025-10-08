@@ -11,30 +11,15 @@ services:
       SSH_AUTH_SOCK: $SSH_AUTH_SOCK
       TERM: $TERM
       SHELL: $SHELL
-    runtime: nvidia
+      RMW_IMPLEMENTATION: rmw_cyclonedds_cpp
     privileged: true
     restart: always
     volumes:
-      # display related 
+      # display related
       - ~/.Xauthority:/root/.Xauthority:rw
       # ssh related
       - $SSH_AUTH_SOCK:$SSH_AUTH_SOCK
-      # nvim related
-      - ~/.config/nvim:/root/.config/nvim:rw
-      - ~/.config/coc:/root/.config/coc:rw
-      - ~/.config/github-copilot:/root/.config/github-copilot:rw
-      - ~/.local/share/nvim/:/root/.local/share/nvim/:rw
-      # tmux related
-      - ~/.tmux:/root/.tmux:ro
-      - ~/.tmux.conf:/root/.tmux.conf:ro
-      # git
-      - ~/.gitconfig:/root/.gitconfig_local
       # working dirs
       - ./workspace:/root/aerostack2_ws/:rw
-      - /dev/:/dev
-      - ~/project_mavlink:/root/project_mavlink:rw
-      # - /media/miguel/CVAR_Miguel/wind_measurement/rosbags:/root/rosbags
-      # - /media/miguel/CVAR_Miguel1/wind_measurement/rosbags:/root/rosbags
-      - ~/Downloads/wind_measurement_2_flights/wind_measurement/rosbags:/root/rosbags
     network_mode: "host"
     command: tail -f /dev/null

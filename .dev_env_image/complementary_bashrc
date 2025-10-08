@@ -1,0 +1,45 @@
+#!/bin/bash
+
+alias vim=nvim
+
+source ~/workspace/install/setup.bash
+
+function rosbuild() {
+    args=("$@")
+    VERBOSE=0
+    PACKAGE_NAME=""
+    DEBUG=0
+    for arg in "${args[@]}"; do
+        case $arg in
+            -v|--verbose)
+                VERBOSE=1
+                ;;
+            -d|--debug)
+                DEBUG=1
+                ;;
+            *)
+                PACKAGE_NAME=$arg
+                ;;
+        esac
+    done
+    DEBUG_FLAG=""
+    if [ $DEBUG -eq 1 ]; then
+        DEBUG_FLAG="-DCMAKE_BUILD_TYPE=RelWithDebInfo"
+    else
+        DEBUG_FLAG="-DCMAKE_BUILD_TYPE=Release"
+    fi
+    if [ $VERBOSE -eq 1 ]; then
+        VERBOSE_FLAG="--event-handlers console_direct+"
+    else
+        VERBOSE_FLAG=""
+    fi
+    pushd ~/workspace > /dev/null 2>&1
+    if [ -z "$PACKAGE_NAME" ]; then
+        echo "No package name provided. Building all packages."
+        colcon build $VERBOSE_FLAG --symlink-install --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=ON $DEBUG_FLAG
+    else
+        echo "Building package: $PACKAGE_NAME"
+        colcon build $VERBOSE_FLAG --symlink-install --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=ON $DEBUG_FLAG --packages-select $PACKAGE_NAME
+    fi
+    popd > /dev/null 2>&1
+}

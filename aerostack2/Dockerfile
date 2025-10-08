@@ -1,45 +1,17 @@
 FROM aerostack2/nightly-humble
 
-WORKDIR /root/
-
-RUN add-apt-repository ppa:neovim-ppa/unstable && apt update 
-RUN apt-get install apt-utils sudo software-properties-common ca-certificates curl gnupg -y
-
-# NODE JS and PYNVIM for use nvim
-ARG NODE_MAJOR=20
-RUN mkdir -p /etc/apt/keyrings
-RUN curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
-RUN echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" | sudo tee /etc/apt/sources.list.d/nodesource.list
-
-RUN apt-get update 
-RUN apt-get install neovim nodejs python3-pip -y
-RUN pip3 install pynvim 
-
-# this folders are for nvim
-RUN mkdir .config
-RUN mkdir .local/share -p
-
-RUN apt-get install tmux tmuxinator -y
 RUN apt-get install ros-humble-mavros ros-humble-mavros-extras -y
 WORKDIR /tmp/
 RUN wget https://raw.githubusercontent.com/mavlink/mavros/ros2/mavros/scripts/install_geographiclib_datasets.sh 
 RUN chmod +x install_geographiclib_datasets.sh
 RUN ./install_geographiclib_datasets.sh
-WORKDIR /root/
 
+WORKDIR /root/
 # Setup Cyclone and Zenoh
 
 RUN echo "deb [trusted=yes] https://download.eclipse.org/zenoh/debian-repo/ /" | sudo tee -a /etc/apt/sources.list > /dev/null
 RUN apt update && apt install ros-humble-rmw-cyclonedds-cpp zenoh-bridge-ros2dds -y
-RUN echo 'export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp' >> ~/.bashrc
-#RUN echo 'export ROS_LOCALHOST_ONLY=0' >> ~/.bashrc
 
-WORKDIR /root/aerostack2_ws/src
-RUN git clone https://github.com/aerostack2/aerostack2_viz.git
-RUN rosdep install --from-paths aerostack2_viz --ignore-src -r -y
-
-RUN apt-get install cpplint cppcheck -y
-RUN pip install cmakelint -U
 
 COPY ./entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh

@@ -1,17 +1,19 @@
 services:
-  vs_graphs:
-    image: vs_graphs 
+  holistic_s_graphs:
+    image: holistic_s_graphs 
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: vs_graphs
+      ssh: 
+        - default
+    container_name: holistic_s_graphs
     environment:
       DISPLAY: $DISPLAY
       XAUTHORITY: $XAUTHORITY
       SSH_AUTH_SOCK: $SSH_AUTH_SOCK
       NVIDIA_VISIBLE_DEVICES: all
       NVIDIA_DRIVER_CAPABILITIES: all
-      TERM: $TERM
+      TERM: xterm-256color
       SHELL: $SHELL
     runtime: nvidia
     privileged: true
@@ -28,8 +30,8 @@ services:
       - ~/.config/github-copilot:/root/.config/github-copilot:rw
       - ~/.local/share/nvim/:/root/.local/share/nvim/:rw
       # tmux related
-      - ~/.tmux:/root/.tmux:ro
-      - ~/.tmux.conf:/root/.tmux.conf:ro
+      - ~/.tmux:/root/.tmux:r
+      - ~/.tmux.conf:/root/.tmux.conf:r
       # git
       - ~/.gitconfig:/root/.gitconfig_local
       # working dirs
@@ -37,5 +39,9 @@ services:
       # dev
       - /dev:/dev:rw
       # rosbag
+      - ~/Datasets/:/root/Datasets/:rw
+      # complementary bash
+      - ./complementary_bashrc:/root/.complementary_bashrc
     network_mode: "host"
     command: tail -f /dev/null
+    hostname: holistic_s_graphs

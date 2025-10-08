@@ -170,8 +170,6 @@ RUN --mount=type=cache,target=/var/cache/apt \
 # Store list of packages (must be last)
 RUN mkdir -p /opt/nvidia/isaac_ros_dev_base && dpkg-query -W | sort > /opt/nvidia/isaac_ros_dev_base/x86_64-end-packages.csv
 
-## FROM HERE IS THE SAME AS THE ORIGINAL DOCKERFILE start
-
 
 RUN apt update && apt install locales -y
 RUN locale-gen en_US en_US.UTF-8
@@ -189,7 +187,6 @@ RUN apt update
 RUN apt install ros-humble-desktop  ros-dev-tools -y
 
 # AS2 
-
 
 RUN apt-get install python3-rosdep  \
                 python3-pip     \
@@ -214,86 +211,6 @@ RUN apt-get install cppcheck lcov -y
 # RUN colcon mixin update default
 RUN rm -rf log # remove log folder
 
-RUN pip3 install colcon-lcov-result cpplint cmakelint
-RUN pip3 install PySimpleGUI-4-foss
-
-RUN mkdir -p /root/aerostack2_ws/src/
-WORKDIR /root/aerostack2_ws/src/
-RUN git clone https://github.com/aerostack2/aerostack2.git -b main
-
-WORKDIR /root/aerostack2_ws
-RUN rosdep init
-RUN rosdep update
-RUN rosdep fix-permissions
-ENV ROS_DISTRO=humble
-RUN . /opt/ros/$ROS_DISTRO/setup.sh && rosdep install --from-paths src --ignore-src -r -y
-
-# RUN . /opt/ros/$ROS_DISTRO/setup.sh && colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
-
-RUN echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> ~/.bashrc
-RUN echo 'export AEROSTACK2_PATH=/root/aerostack2_ws/src/aerostack2' >> ~/.bashrc
-RUN echo 'source $AEROSTACK2_PATH/as2_cli/setup_env.bash' >> ~/.bashrc
-
-
-# LAST STEPS
-WORKDIR /root/
-
-RUN add-apt-repository ppa:neovim-ppa/unstable && apt update 
-RUN apt-get install apt-utils software-properties-common ca-certificates curl gnupg -y
-
-# NODE JS and PYNVIM for use nvim
-ARG NODE_MAJOR=20
-RUN mkdir -p /etc/apt/keyrings
-RUN curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
-RUN echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list
-
-RUN apt-get update 
-RUN apt-get install neovim nodejs python3-pip -y
-RUN pip3 install pynvim 
-
-# this folders are for nvim
-RUN mkdir .config
-RUN mkdir .local/share -p
-
-RUN apt-get install tmux tmuxinator -y
-
-RUN apt-get install cpplint cppcheck -y
-RUN pip install cmakelint -U
-
-# Gazebo Fortress clean uninstall
-RUN apt remove ignition* -y
-RUN apt autoremove -y
-
-# Install Gazebo Harmonic
-RUN apt-get install lsb-release wget gnupg && apt-get update
-RUN wget https://packages.osrfoundation.org/gazebo.gpg -O /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg
-RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null
-RUN apt-get update && apt-get install -y -q gz-harmonic
-
-# Install ros-gazebo dependencies
-RUN apt update && apt install ros-humble-ros-gzharmonic -y
-
-
-# Install dependencies
-RUN python3 -m pip install -U numpy==1.26
-RUN python3 -m pip install -U lightning
-RUN python3 -m pip install -U scikit-image
-RUN python3 -m pip install -U rosbags
-RUN python3 -m pip install -U rosbags-image
-RUN python3 -m pip install -U tensorboard
-RUN python3 -m pip install -U labelbox
-RUN python3 -m pip install -U natsort
-
-
-RUN apt remove ros-humble-librealsense2 -y
-RUN git clone https://github.com/IntelRealSense/librealsense.git -b v2.50.0 && cd librealsense && mkdir build && cd build && cmake .. -DFORCE_RSUSB_BACKEND=1 && make -j12 && sudo make install
-RUN mkdir -p /etc/udev/rules.d
-RUN cp ~/librealsense/config/99-realsense-libusb.rules /etc/udev/rules.d/99-realsense-libusb.rules
-
-RUN apt install ros-humble-plotjuggler-ros ripgrep xclip ros-humble-rqt-tf-tree -y
-
-COPY ./entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
 ENTRYPOINT ["bash", "/entrypoint.sh"]
 
 

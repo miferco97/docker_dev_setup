@@ -1,0 +1,35 @@
+services:
+  DEV_ENV:
+    image: DEV_ENV_IMAGE
+    build:
+      context: .
+      dockerfile: devenv.Dockerfile
+      ssh:
+        - default
+      args:
+        BASE_IMAGE: BASE_IMAGE
+        USERNAME: $USERNAME
+        USER_UID: 1000
+        USER_GID: 1000
+    environment:
+      DISPLAY: $DISPLAY
+      XAUTHORITY: $XAUTHORITY
+      SSH_AUTH_SOCK: $SSH_AUTH_SOCK
+      TERM: xterm-256color
+      SHELL: $SHELL
+    network_mode: "host"
+    volumes:
+      # ssh related
+      - $SSH_AUTH_SOCK:$SSH_AUTH_SOCK
+      # nvim related
+      - ~/.config/nvim:/home/$USERNAME/.config/nvim:rw
+      - ~/.config/coc:/home/$USERNAME/.config/coc:rw
+      - ~/.config/github-copilot:/home/$USERNAME/.config/github-copilot:rw
+      - ~/.local/share/nvim/:/home/$USERNAME/.local/share/nvim:rw
+      # tmux related
+      - ~/.tmux:/home/$USERNAME/.tmux:rw
+      - ~/.tmux.conf:/home/$USERNAME/.tmux.conf:rw
+      # git
+      - ~/.gitconfig:/home/$USERNAME/.gitconfig_local:rw
+      # complementary bash
+      - ./complementary_bashrc:/home/miguel/.complementary_bashrc:rw

@@ -4,6 +4,25 @@
 
 # autocompletion
 
+get_compose_file() {
+  project_dir=$1
+  # if there is a folder named .devenv in the project directory, use the docker-compose-devenv.yml file
+  if [ -f $project_dir/.devenv/docker-compose-devenv.yml ]; then
+      echo "$project_dir/.devenv/docker-compose-devenv.yml"
+    else
+      echo "$project_dir/docker-compose.yml"
+    fi
+
+}
+
+generate_env_folder() {
+  project_dir=$1
+  if [ ! -d $project_dir/.devenv ]; then
+    mkdir $project_dir/.devenv
+    echo "Created .devenv folder in $project_dir"
+  fi
+  python3 $PROJECTS_DIR/.dev_env_image/extend_docker_compose.py $project_dir/docker-compose.yml -d $PROJECTS_DIR/.dev_env_image/devenv_compose.yml -o $project_dir/.devenv/docker-compose-devenv.yml
+}
 
 usage() {
   echo "Usage: docker-env [command]"
@@ -39,7 +58,8 @@ list_projects() {
   lines_to_echo=""
   lines_to_echo_running=""
   for folder in $folders; do
-    container=$(grep container_name $folder/docker-compose.yml | awk '{print $2}')
+    container=$(grep container_name $(get_compose_file $folder) | awk '{print $2}')
+
     running=$(docker ps -q -f name=$container)
 
     if [ "$1" == "-p" ]; then
@@ -77,12 +97,13 @@ search_project() {
     echo "Project name is required"
     exit 1
   fi
-  list=$(list_projects)
+  list=$(list_projects -p)
   for item in $list; do
     if [ $item == $project ]; then
       return 0
     fi
   done
+  return 1
 }
 
 
@@ -99,7 +120,7 @@ check_is_running() {
   project=$1
   search_project $project
   if [ $? -eq 0 ]; then
-    container=$(grep container_name $PROJECTS_DIR/$project/docker-compose.yml | awk '{print $2}')
+    container=$(grep container_name $(get_compose_file $PROJECTS_DIR/$project) | awk '{print $2}')
     running=$(docker ps -q -f name=$container)
     if [ -z $running ]; then
       return 1
@@ -112,6 +133,7 @@ check_is_running() {
   fi
 }
 
+
 up() {
   project=$1
   search_project $project
@@ -119,11 +141,19 @@ up() {
     if check_is_running $project; then
       echo "Project is already running"
     else
+      echo "Starting project $project"
+        echo "Generating .devenv/docker-compose-devenv.yml file"
+        generate_env_folder $PROJECTS_DIR/$project
+        if [ $? -ne 0 ]; then
+          echo "Failed to generate .devenv/docker-compose-devenv.yml file"
+          exit 1
+        fi
       # check if the project is already running
       # if it is, show a message
       # if not, start the project
-      docker compose -f $PROJECTS_DIR/$project/docker-compose.yml up -d
-      xhost + 
+      docker compose -f $(get_compose_file $PROJECTS_DIR/$project) up -d
+      xhost +local:docker
+      xhost +local:root
     fi
     #parse the container name from the docker-compose file
     container=$(grep container_name $PROJECTS_DIR/$project/docker-compose.yml | awk '{print $2}')
@@ -137,9 +167,19 @@ down() {
   project=$1
   search_project $project
   if [ $? -eq 0 ]; then
-    docker compose -f $PROJECTS_DIR/$project/docker-compose.yml down
+    compose_file=$(get_compose_file $PROJECTS_DIR/$project)
+    echo "Stopping project $project using compose file $compose_file"
+    docker compose -f $compose_file down
   else
     echo "Project not found"
+  fi
+  # check if there is any other container running
+  # if not, stop xhost 
+  RUNNING=$(docker ps -q)
+  if [ -z $RUNNING ]; then
+    xhost -local:docker
+    xhost -local:root
+    echo "No other containers running, stopping xhost"
   fi
 }
 
@@ -147,17 +187,31 @@ restart() {
   project=$1
   search_project $project
   if [ $? -eq 0 ]; then
-    docker compose -f $PROJECTS_DIR/$project/docker-compose.yml restart
+    docker compose -f $(get_compose_file $PROJECTS_DIR/$project) restart
   else
     echo "Project not found"
   fi
+
+
 }
 
 build() {
   project=$1
+  verbose=$2
+  PROGRESS=""
+  if [ "$verbose" == "-v" ]; then
+    PROGRESS="--progress=plain"
+  fi
   search_project $project
   if [ $? -eq 0 ]; then
-    docker compose -f $PROJECTS_DIR/$project/docker-compose.yml build
+    echo "Building project $project"
+      echo "Generating .devenv/docker-compose-devenv.yml file"
+      generate_env_folder $PROJECTS_DIR/$project
+      if [ $? -ne 0 ]; then
+        echo "Failed to generate .devenv/docker-compose-devenv.yml file"
+        exit 1
+      fi
+    docker compose -f $(get_compose_file $PROJECTS_DIR/$project) build $PROGRESS
   else
     echo "Project not found"
   fi
@@ -190,7 +244,7 @@ case $1 in
     restart $2
     ;;
   build)
-    build $2
+    build $2 $3
     ;;
   list)
     list_projects $2

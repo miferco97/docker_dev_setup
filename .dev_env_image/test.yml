@@ -1,0 +1,53 @@
+services:
+  informed_vsgraphs_ros2_build:
+    build:
+      context: /home/miguel/docker_dev_setup/informed_vs_graphs
+      dockerfile: Dockerfile
+      ssh:
+        - default
+    command: "true"
+    image: informed_vsgraphs_ros2:base
+  informed_vsgraphs_ros2_dev:
+    build:
+      args:
+        BASE_IMAGE: informed_vsgraphs_ros2:base
+        USERNAME: $USER
+        USER_GID: 1000
+        USER_UID: 1000
+      context: /home/miguel/docker_dev_setup/dev_env_image
+      dockerfile: devenv.Dockerfile
+      ssh:
+        - default
+    command: tail -f /dev/null
+    container_name: informed_vsgraphs_ros2
+    depends_on:
+      - informed_vsgraphs_ros2_build
+    environment:
+      DISPLAY: $DISPLAY
+      NVIDIA_DRIVER_CAPABILITIES: all
+      NVIDIA_VISIBLE_DEVICES: all
+      SHELL: $SHELL
+      SSH_AUTH_SOCK: $SSH_AUTH_SOCK
+      TERM: xterm-256color
+      XAUTHORITY: $XAUTHORITY
+    image: informed_vsgraphs_ros2:dev
+    network_mode: host
+    privileged: true
+    restart: always
+    runtime: nvidia
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - /dev:/dev:rw
+      - ~/.Xauthority:/home/$USERNAME/.Xauthority:rw
+      - /home/miguel/docker_dev_setup/informed_vs_graphs/workspace:/home/$USERNAME/workspace:rw
+      - /home/miguel/docker_dev_setup/informed_vs_graphs/tools:/home/$USERNAME/tools:rw
+      - /home/miguel/docker_dev_setup/informed_vs_graphs/rosbags:/home/$USERNAME/rosbags:rw
+      - $SSH_AUTH_SOCK:$SSH_AUTH_SOCK
+      - ~/.config/nvim:/home/$USERNAME/.config/nvim:rw
+      - ~/.config/coc:/home/$USERNAME/.config/coc:rw
+      - ~/.config/github-copilot:/home/$USERNAME/.config/github-copilot:rw
+      - ~/.local/share/nvim/:/home/$USERNAME/.local/share/nvim:rw
+      - ~/.tmux:/home/$USERNAME/.tmux:rw
+      - ~/.tmux.conf:/home/$USERNAME/.tmux.conf:rw
+      - ~/.gitconfig:/home/$USERNAME/.gitconfig_local:rw
+      - /home/miguel/docker_dev_setup/dev_env_image/complementary_bashrc:/home/miguel/.complementary_bashrc:rw

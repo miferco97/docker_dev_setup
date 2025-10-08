@@ -1,18 +1,12 @@
-version: '3.3'
+version: "3.3"
 services:
-  container:
+  ubuntu_basic:
     image: ubuntu:20.04
     container_name: ubuntu_basic
-    command: tail -F anything 
+    command: tail -F anything
     environment:
       DISPLAY: $DISPLAY
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
       - ~/.Xauthority:/root/.Xauthority
-      - ~/.tmux:/home/user/.tmux
-      - ~/.tmux.conf:/home/user/.tmux.conf
-      - ~/.config/nvim:/home/user/.config/nvim
-      - ~/.config/coc:/home/user/.config/coc
-      - ~/.local/share/nvim/:/home/user/.local/share/nvim/
-      # - ~/.shh:/home/user/.ssh
     network_mode: "host"
