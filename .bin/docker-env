@@ -21,19 +21,41 @@ generate_env_folder() {
     mkdir $project_dir/.devenv
     echo "Created .devenv folder in $project_dir"
   fi
+  if [ ! -d $project_dir/.claude_local ]; then
+    mkdir $project_dir/.claude_local
+    echo "Created .claude_local folder in $project_dir"
+  fi
+  project_name=$(basename $project_dir)
+  if [ ! -d $HOME/.claude/projects/dev-env-$project_name ]; then
+    mkdir -p $HOME/.claude/projects/dev-env-$project_name
+    echo "Created ~/.claude/projects/dev-env-$project_name folder"
+  fi
   python3 $PROJECTS_DIR/.dev_env_image/extend_docker_compose.py $project_dir/docker-compose.yml -d $PROJECTS_DIR/.dev_env_image/devenv_compose.yml -o $project_dir/.devenv/docker-compose-devenv.yml
 }
 
 usage() {
+  echo ""
+  echo "  ____             _                _____            "
+  echo " |  _ \\  ___   ___| | _____ _ __   | ____|_ ____   __"
+  echo " | | | |/ _ \\ / __| |/ / _ \\ '__|  |  _| | '_ \\ \\ / /"
+  echo " | |_| | (_) | (__|   <  __/ |     | |___| | | \\ V / "
+  echo " |____/ \\___/ \\___|_|\\_\\___|_|     |_____|_| |_|\\_/  "
+  echo ""
+  echo " A CLI tool for managing Docker-based development environments."
+  echo " Easily build, run, and attach to project containers from anywhere."
+  echo ""
+  echo " Author: Miguel Fernandez Cortizas (github.com/miferco97)"
+  echo " License: MIT - $(date +%Y)"
+  echo ""
   echo "Usage: docker-env [command]"
   echo "Commands:"
   echo "  up <project_name> - Start the project"
   echo "  down <project_name> - Stop the project"
   echo "  restart <project_name> - Restart the project"
-  echo "  build <project_name> - Build the project"
+  echo "  build <project_name> [-v] [--no-cache] - Build the project"
   echo "  setup <project_name> - Setup the project"
-  echo "  list - List all projects"
-  echo "  --help - Show this help"
+  echo "  list [-r|--running] [-p|--plain] - List all projects"
+  echo "  -h, --help - Show this help"
   exit 1
 }
 
@@ -46,12 +68,23 @@ PROJECTS_DIR=$(dirname "$SCRIPT_DIR")
 # projects are directories in the same directory as the script without the bin directory and occluded files
 
 list_projects() {
-  # first check the rest of arguments
+  MODE=""
+  for arg in "$@"; do
+    case $arg in
+      -r|--running) MODE="running" ;;
+      -p|--plain) MODE="plain" ;;
+      -h|--help)
+        echo "Usage: docker-env list [-r|--running] [-p|--plain]"
+        echo "List all projects."
+        echo "Options:"
+        echo "  -r, --running  Show only running projects"
+        echo "  -p, --plain    Show only project names (plain)"
+        echo "  -h, --help  Show this help"
+        exit 0
+        ;;
+    esac
+  done
 
-  # without args showing all projects but if the project is running, show it in yellow with [running] 
-  # -r for showing only the running projects
-  # -p for showing only names of all projects plainly
-  
   folders=$(find $PROJECTS_DIR -maxdepth 1  -type d -not -name ".*" -not -name "bin" -wholename "$PROJECTS_DIR/*")
   # sorting the folders by name
   folders=$(echo $folders | tr ' ' '\n' | sort | tr '\n' ' ')
@@ -62,9 +95,9 @@ list_projects() {
 
     running=$(docker ps -q -f name=$container)
 
-    if [ "$1" == "-p" ]; then
+    if [ "$MODE" == "plain" ]; then
       lines_to_echo+=$(basename $folder)" "
-    elif [ "$1" == "-r" ]; then
+    elif [ "$MODE" == "running" ]; then
       if [ ! -z $running ]; then
         lines_to_echo+=$(basename $folder)" "
       fi
@@ -135,7 +168,23 @@ check_is_running() {
 
 
 up() {
-  project=$1
+  project=""
+  for arg in "$@"; do
+    case $arg in
+      -h|--help)
+        echo "Usage: docker-env up <project_name>"
+        echo "Start the project and attach to its container."
+        echo "Options:"
+        echo "  -h, --help  Show this help"
+        exit 0
+        ;;
+      *) project=$arg ;;
+    esac
+  done
+  if [ -z "$project" ]; then
+    echo "Usage: docker-env up <project_name>"
+    exit 1
+  fi
   search_project $project
   if [ $? -eq 0 ]; then
     if check_is_running $project; then
@@ -164,7 +213,23 @@ up() {
 }
 
 down() {
-  project=$1
+  project=""
+  for arg in "$@"; do
+    case $arg in
+      -h|--help)
+        echo "Usage: docker-env down <project_name>"
+        echo "Stop the project container."
+        echo "Options:"
+        echo "  -h, --help  Show this help"
+        exit 0
+        ;;
+      *) project=$arg ;;
+    esac
+  done
+  if [ -z "$project" ]; then
+    echo "Usage: docker-env down <project_name>"
+    exit 1
+  fi
   search_project $project
   if [ $? -eq 0 ]; then
     compose_file=$(get_compose_file $PROJECTS_DIR/$project)
@@ -184,7 +249,23 @@ down() {
 }
 
 restart() {
-  project=$1
+  project=""
+  for arg in "$@"; do
+    case $arg in
+      -h|--help)
+        echo "Usage: docker-env restart <project_name>"
+        echo "Restart the project container."
+        echo "Options:"
+        echo "  -h, --help  Show this help"
+        exit 0
+        ;;
+      *) project=$arg ;;
+    esac
+  done
+  if [ -z "$project" ]; then
+    echo "Usage: docker-env restart <project_name>"
+    exit 1
+  fi
   search_project $project
   if [ $? -eq 0 ]; then
     docker compose -f $(get_compose_file $PROJECTS_DIR/$project) restart
@@ -196,11 +277,27 @@ restart() {
 }
 
 build() {
-  project=$1
-  verbose=$2
   PROGRESS=""
-  if [ "$verbose" == "-v" ]; then
-    PROGRESS="--progress=plain"
+  NO_CACHE=""
+  project=""
+  for arg in "$@"; do
+    case $arg in
+      -v) PROGRESS="--progress=plain" ;;
+      --no-cache) NO_CACHE="--no-cache" ;;
+      -h|--help)
+        echo "Usage: docker-env build <project_name> [-v] [--no-cache]"
+        echo "Options:"
+        echo "  -v              Show verbose build output"
+        echo "  --no-cache      Build without using Docker cache"
+        echo "  -h, --help      Show this help"
+        exit 0
+        ;;
+      *) project=$arg ;;
+    esac
+  done
+  if [ -z "$project" ]; then
+    echo "Usage: docker-env build <project_name> [-v] [--no-cache]"
+    exit 1
   fi
   search_project $project
   if [ $? -eq 0 ]; then
@@ -211,7 +308,7 @@ build() {
         echo "Failed to generate .devenv/docker-compose-devenv.yml file"
         exit 1
       fi
-    docker compose -f $(get_compose_file $PROJECTS_DIR/$project) build $PROGRESS
+    docker compose -f $(get_compose_file $PROJECTS_DIR/$project) build $PROGRESS $NO_CACHE
   else
     echo "Project not found"
   fi
@@ -219,11 +316,23 @@ build() {
 
 
 setup() {
-  # create the project if it does not exist
-  # each project is a directory in the same directory as the script and contains
-  # a docker-compose.yml file
-  # the project name is the name of the directory
-  project=$1
+  project=""
+  for arg in "$@"; do
+    case $arg in
+      -h|--help)
+        echo "Usage: docker-env setup <project_name>"
+        echo "Build and start the project."
+        echo "Options:"
+        echo "  -h, --help  Show this help"
+        exit 0
+        ;;
+      *) project=$arg ;;
+    esac
+  done
+  if [ -z "$project" ]; then
+    echo "Usage: docker-env setup <project_name>"
+    exit 1
+  fi
   search_project $project
   if [ $? -eq 0 ]; then
     docker compose -f $PROJECTS_DIR/$project/docker-compose.yml up -d --build
@@ -235,24 +344,24 @@ setup() {
 
 case $1 in
   up)
-    up $2
+    up "${@:2}"
     ;;
   down)
-    down $2
+    down "${@:2}"
     ;;
   restart)
-    restart $2
+    restart "${@:2}"
     ;;
   build)
-    build $2 $3
+    build "${@:2}"
     ;;
   list)
-    list_projects $2
+    list_projects "${@:2}"
     ;;
   setup)
-    setup $2
+    setup "${@:2}"
     ;;
-  --help)
+  -h|--help)
     usage
     ;;
   *)

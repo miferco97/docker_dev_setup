@@ -39,7 +39,7 @@ function rosbuild() {
         colcon build $VERBOSE_FLAG --symlink-install --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=ON $DEBUG_FLAG
     else
         echo "Building package: $PACKAGE_NAME"
-        colcon build $VERBOSE_FLAG --symlink-install --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=ON $DEBUG_FLAG --packages-select $PACKAGE_NAME
+        colcon build $VERBOSE_FLAG --symlink-install --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=ON $DEBUG_FLAG --packages-up-to $PACKAGE_NAME
     fi
     popd > /dev/null 2>&1
 }

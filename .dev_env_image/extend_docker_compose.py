@@ -96,10 +96,32 @@ def divide_docker_compose(docker_compose_file):
     }
 
 
+def resolve_project_variables(run_part, project_dir):
+    """Replace $PROJECT_DIR and $PROJECT_NAME in volume paths and environment values."""
+    project_name = os.path.basename(project_dir)
+    if "volumes" in run_part:
+        resolved = []
+        for vol in run_part["volumes"]:
+            vol = vol.replace("$PROJECT_DIR", project_dir)
+            vol = vol.replace("$PROJECT_NAME", project_name)
+            resolved.append(vol)
+        run_part["volumes"] = resolved
+    if "environment" in run_part:
+        for key, value in run_part["environment"].items():
+            if isinstance(value, str):
+                run_part["environment"][key] = value.replace(
+                    "$PROJECT_DIR", project_dir
+                ).replace("$PROJECT_NAME", project_name)
+
+
 def extend_docker_compose(base_file, extension_file, output_file):
     base_divided = divide_docker_compose(base_file)
     # print(f"Base divided: {base_divided}")
     dev_divided = divide_docker_compose(extension_file)
+
+    # Resolve $PROJECT_DIR and $PROJECT_NAME in devenv volumes
+    project_dir = os.path.dirname(os.path.abspath(base_file))
+    resolve_project_variables(dev_divided["run_part"], project_dir)
 
     # if there is no build part in base_service, then use the service name as BASE_IMAGE without an additional service
     print(f"Base divided build part: {base_divided['build_part']}")

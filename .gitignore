@@ -1,6 +1,20 @@
-*/workspace/*
+# Ignore all project subdirectory contents by default
+*/*
+
+# Whitelist docker/build files
+!*/Dockerfile
+!*/docker-compose.yml
+!*/entrypoint.sh
 !*/workspace/.gitkeep
+!*/README.md
+!*/requirements.txt
+!*/complementary_bashrc
+!*/complementary_deps.repos
+
+# Whitelist tooling directories
 !.bin/**
 !.dev_env_image/**
+
+# Ignore host-specific files
 .gitconfig
-.devenv/
+.claude/

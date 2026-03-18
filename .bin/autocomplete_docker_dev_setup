@@ -3,18 +3,73 @@
 export PATH=$PATH:~/docker_dev_setup/.bin/
 
 _docker_env() {
-  local cur prev
+  local cur prev cmd
   COMPREPLY=()
   cur="${COMP_WORDS[COMP_CWORD]}"
   prev="${COMP_WORDS[COMP_CWORD-1]}"
-  if [[ $prev == "up" || $prev == "build" ]]; then
-    COMPREPLY=( $(compgen -W "$(docker-env list -p)" -- "$cur") )
-  elif [[  $prev == "down" || $prev == "restart" ]]; then
-    COMPREPLY=( $(compgen -W "$(docker-env list -r)" -- "$cur") )
-  else
-    COMMANDS=$(docker-env -h | awk 'NR>2' | awk '{print $1}')
-    COMPREPLY=( $(compgen -W "$COMMANDS" -- "$cur") )
+
+  # Determine the subcommand (first non-option argument after docker-env)
+  cmd=""
+  for ((i=1; i < COMP_CWORD; i++)); do
+    case "${COMP_WORDS[i]}" in
+      -*) ;;
+      *) cmd="${COMP_WORDS[i]}"; break ;;
+    esac
+  done
+
+  # If no subcommand yet, complete subcommands or top-level flags
+  if [[ -z "$cmd" ]]; then
+    if [[ "$cur" == -* ]]; then
+      COMPREPLY=( $(compgen -W "-h --help" -- "$cur") )
+    else
+      COMPREPLY=( $(compgen -W "up down restart build setup list" -- "$cur") )
+    fi
+    return
   fi
+
+  # Complete arguments for each subcommand
+  case "$cmd" in
+    up)
+      if [[ "$cur" == -* ]]; then
+        COMPREPLY=( $(compgen -W "-h --help" -- "$cur") )
+      else
+        COMPREPLY=( $(compgen -W "$(docker-env list -p)" -- "$cur") )
+      fi
+      ;;
+    down)
+      if [[ "$cur" == -* ]]; then
+        COMPREPLY=( $(compgen -W "-h --help" -- "$cur") )
+      else
+        COMPREPLY=( $(compgen -W "$(docker-env list -r)" -- "$cur") )
+      fi
+      ;;
+    restart)
+      if [[ "$cur" == -* ]]; then
+        COMPREPLY=( $(compgen -W "-h --help" -- "$cur") )
+      else
+        COMPREPLY=( $(compgen -W "$(docker-env list -r)" -- "$cur") )
+      fi
+      ;;
+    build)
+      if [[ "$cur" == -* ]]; then
+        COMPREPLY=( $(compgen -W "-v -h --no-cache --help" -- "$cur") )
+      else
+        COMPREPLY=( $(compgen -W "$(docker-env list -p)" -- "$cur") )
+      fi
+      ;;
+    setup)
+      if [[ "$cur" == -* ]]; then
+        COMPREPLY=( $(compgen -W "-h --help" -- "$cur") )
+      else
+        COMPREPLY=( $(compgen -W "$(docker-env list -p)" -- "$cur") )
+      fi
+      ;;
+    list)
+      if [[ "$cur" == -* ]]; then
+        COMPREPLY=( $(compgen -W "-r --running -p --plain -h --help" -- "$cur") )
+      fi
+      ;;
+  esac
 }
 
 complete -F _docker_env docker-env

@@ -17,6 +17,7 @@ services:
       SSH_AUTH_SOCK: $SSH_AUTH_SOCK
       TERM: xterm-256color
       SHELL: $SHELL
+      DEV_ENV_NAME: $PROJECT_NAME
     network_mode: "host"
     volumes:
       # ssh related
@@ -32,4 +33,13 @@ services:
       # git
       - ~/.gitconfig:/home/$USERNAME/.gitconfig_local:rw
       # complementary bash
-      - ./complementary_bashrc:/home/miguel/.complementary_bashrc:rw
+      - ./complementary_bashrc:/home/$USERNAME/.complementary_bashrc:rw
+      # claude ai
+      # base layer: per-project local storage (memory, cache, sessions)
+      - $PROJECT_DIR/.claude_local/:/home/$USERNAME/.claude/:rw
+      # overlays: shared auth and settings from host (read-only)
+      - ~/.claude.json:/home/$USERNAME/.claude.json:rw
+      - ~/.claude/.credentials.json:/home/$USERNAME/.claude/.credentials.json:rw
+      - ~/.claude/settings.json:/home/$USERNAME/.claude/settings.json:rw
+      # overlay: session jsonl files namespaced per project on host
+      - ~/.claude/projects/dev-env-$PROJECT_NAME/:/home/$USERNAME/.claude/projects/:rw
