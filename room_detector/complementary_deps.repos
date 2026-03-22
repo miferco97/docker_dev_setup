@@ -1,0 +1,17 @@
+repositories:
+  src/fast_gicp:
+    type: git
+    url: git@github.com:koide3/fast_gicp.git
+    version: master
+  src/ndt_omp:
+    type: git
+    url: git@github.com:koide3/ndt_omp.git
+    version: master
+  src/msgs/situational_graphs_msgs:
+    type: git
+    url: git@github.com:snt-arg/situational_graphs_msgs.git
+    version: main
+  src/msgs/situational_graphs_reasoning_msgs:
+    type: git
+    url: git@github.com:snt-arg/situational_graphs_reasoning_msgs.git
+    version: main

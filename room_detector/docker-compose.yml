@@ -1,0 +1,47 @@
+services:
+  room_detector:
+    image: room_detector
+    build:
+      context: .
+      dockerfile: Dockerfile
+      ssh:
+        - default
+    container_name: room_detector
+    environment:
+      DISPLAY: $DISPLAY
+      XAUTHORITY: $XAUTHORITY
+      SSH_AUTH_SOCK: $SSH_AUTH_SOCK
+      NVIDIA_VISIBLE_DEVICES: all
+      NVIDIA_DRIVER_CAPABILITIES: all
+      TERM: xterm-256color
+      SHELL: $SHELL
+    runtime: nvidia
+    privileged: true
+    restart: always
+    volumes:
+      # display related
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ~/.Xauthority:/root/.Xauthority:rw
+      # ssh related
+      - $SSH_AUTH_SOCK:$SSH_AUTH_SOCK
+      # nvim related
+      - ~/.config/nvim:/root/.config/nvim:rw
+      - ~/.config/coc:/root/.config/coc:rw
+      - ~/.config/github-copilot:/root/.config/github-copilot:rw
+      - ~/.local/share/nvim/:/root/.local/share/nvim/:rw
+      # tmux related
+      - ~/.tmux:/root/.tmux:r
+      - ~/.tmux.conf:/root/.tmux.conf:r
+      # git
+      - ~/.gitconfig:/root/.gitconfig_local
+      # working dirs
+      - ./workspace:/home/$USERNAME/workspace/:rw
+      # dev
+      - /dev:/dev:rw
+      # rosbag
+      - ~/Datasets/:/root/Datasets/:rw
+      # complementary bash
+      - ./complementary_bashrc:/root/.complementary_bashrc
+    network_mode: "host"
+    command: tail -f /dev/null
+    hostname: room_detector
